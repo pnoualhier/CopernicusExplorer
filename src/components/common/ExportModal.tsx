@@ -153,9 +153,38 @@ export const ExportModal: React.FC<ExportModalProps> = ({
     );
   };
 
-  // Print Scientific Summary Report
+  // Export Scientific Summary Report
   const handlePrintReport = () => {
-    window.print();
+    const textReport = `=====================================================
+COPERNICUS EXPLORER - RAPPORT SCIENTIFIQUE D'OBSERVATION
+=====================================================
+Zone d'étude : ${locationName}
+Coordonnées : ${coordinates.lat.toFixed(4)}°N, ${coordinates.lng.toFixed(4)}°E
+Bounding Box (WGS84) : [${bbox.west}, ${bbox.south}, ${bbox.east}, ${bbox.north}]
+Période d'analyse : du ${startDate} au ${endDate}
+Date d'extraction : ${new Date().toISOString()}
+
+1. SYNTHÈSE DES OBSERVATIONS
+- Nombre d'observations satellites : ${observations.length}
+- Période temporelle couverte : ${timeSeries.length} points
+- Fournisseurs de données : Copernicus Data Space Ecosystem (CDSE), ECMWF C3S, CAMS, CMS
+
+2. OBSERVATIONS SATELLITAIRES (ÉCHANTILLON)
+${observations.slice(0, 5).map(o => `* [${o.platform}] ${o.acquisitionDate.split('T')[0]} - ${o.title}
+  Niveau: ${o.provenance.processingLevel} | Résolution: ${o.provenance.spatialResolution} | Nuages: ${o.cloudCover ?? 0}%`).join('\n')}
+
+3. INDICATEURS MULTI-CAPTEURS
+${timeSeries.slice(-5).map(t => `* ${t.date} : NDVI=${t.ndvi ?? 'N/A'}, Temp=${t.temperature ?? 'N/A'}°C, Pluie=${t.precipitation ?? 0}mm, NO2=${t.no2 ?? 'N/A'}`).join('\n')}
+
+Attribution : European Space Agency (ESA) & European Commission Copernicus Programme
+Généré avec Copernicus Explorer
+=====================================================`;
+
+    triggerDownload(
+      textReport,
+      `rapport_copernicus_${locationName.replace(/\s+/g, '_')}_${startDate}.txt`,
+      'text/plain;charset=utf-8;'
+    );
   };
 
   return (
@@ -248,13 +277,13 @@ export const ExportModal: React.FC<ExportModalProps> = ({
             <div className="flex items-center gap-3">
               <Printer className="w-5 h-5 text-purple-400 group-hover:scale-110 transition" />
               <div>
-                <div className="font-semibold text-slate-200">Imprimer / Exporter en PDF</div>
+                <div className="font-semibold text-slate-200">Synthèse d'Observation (.txt)</div>
                 <div className="text-[11px] text-slate-400">
-                  Mise en page prête à l'impression avec carte, graphiques et métriques
+                  Rapport scientifique textuel avec coordonnées, capteurs et indicateurs
                 </div>
               </div>
             </div>
-            <span className="text-xs text-purple-400 font-medium">Imprimer</span>
+            <span className="text-xs text-purple-400 font-medium">Télécharger</span>
           </button>
         </div>
       </div>

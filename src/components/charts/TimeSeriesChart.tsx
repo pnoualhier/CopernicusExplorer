@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { TimeSeriesPoint } from '../../types/copernicus';
-import { TrendingUp, BarChart2, Thermometer, CloudRain, Sun, Activity } from 'lucide-react';
+import { TrendingUp } from 'lucide-react';
 
 interface TimeSeriesChartProps {
   series: TimeSeriesPoint[];

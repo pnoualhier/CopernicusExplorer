@@ -29,12 +29,9 @@ import {
   Search,
   Sparkles,
   Download,
-  Info,
-  Layers,
   Thermometer,
   Wind,
   Droplet,
-  Compass,
   BookOpen,
   LayoutDashboard,
 } from 'lucide-react';

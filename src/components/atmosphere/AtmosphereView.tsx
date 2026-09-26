@@ -1,5 +1,5 @@
 import React from 'react';
-import { Wind, AlertCircle, ShieldCheck, Activity } from 'lucide-react';
+import { Wind, ShieldCheck } from 'lucide-react';
 
 export const AtmosphereView: React.FC = () => {
   const pollutants = [

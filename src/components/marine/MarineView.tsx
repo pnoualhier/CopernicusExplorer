@@ -1,5 +1,5 @@
 import React from 'react';
-import { Droplet, Waves, Compass, ArrowUpRight } from 'lucide-react';
+import { Droplet, Waves, ArrowUpRight } from 'lucide-react';
 
 export const MarineView: React.FC = () => {
   const marineMetrics = [

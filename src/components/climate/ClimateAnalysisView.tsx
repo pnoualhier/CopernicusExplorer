@@ -1,6 +1,6 @@
 import React from 'react';
 import { ClimateClimatologyData } from '../../types/copernicus';
-import { Thermometer, TrendingUp, Calendar, AlertTriangle, CloudRain, ExternalLink } from 'lucide-react';
+import { Thermometer, TrendingUp, Calendar } from 'lucide-react';
 
 interface ClimateAnalysisViewProps {
   climatology: ClimateClimatologyData | null;

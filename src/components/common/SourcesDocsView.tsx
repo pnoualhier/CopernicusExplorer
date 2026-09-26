@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { CopernicusApiClient } from '../../services/apiClient';
-import { Database, ExternalLink, ShieldCheck, BookOpen, Layers, Radio, Satellite, Wind, Droplet, Calendar } from 'lucide-react';
+import { ExternalLink, ShieldCheck, BookOpen } from 'lucide-react';
 
 export const SourcesDocsView: React.FC = () => {
   const [collections, setCollections] = useState<any[]>([]);

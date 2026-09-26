@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SpectralIndex, GeoObservation } from '../../types/copernicus';
-import { Eye, Layers, Activity, HelpCircle, Download } from 'lucide-react';
+import { Layers, HelpCircle, Download } from 'lucide-react';
 
 interface SpectralVisualizerProps {
   observation: GeoObservation;

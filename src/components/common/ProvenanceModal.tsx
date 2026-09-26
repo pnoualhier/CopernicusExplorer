@@ -1,6 +1,6 @@
 import React from 'react';
 import { GeoObservation, ProvenanceInfo } from '../../types/copernicus';
-import { Info, X, ExternalLink, ShieldCheck, Database, Calendar, Compass } from 'lucide-react';
+import { Info, X, ExternalLink, ShieldCheck, Database, Calendar } from 'lucide-react';
 
 interface ProvenanceModalProps {
   observation: GeoObservation | null;

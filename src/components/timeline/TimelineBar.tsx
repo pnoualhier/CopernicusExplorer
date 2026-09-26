@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, ChevronLeft, ChevronRight, Play, Pause, RotateCcw } from 'lucide-react';
+import { Calendar, ChevronLeft, ChevronRight, Play, Pause } from 'lucide-react';
 
 interface TimelineBarProps {
   startDate: string;

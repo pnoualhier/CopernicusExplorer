@@ -8,7 +8,7 @@ import {
 import { CopernicusMap } from '../map/CopernicusMap';
 import { SpectralVisualizer } from '../sentinel/SpectralVisualizer';
 import { TimeSeriesChart } from '../charts/TimeSeriesChart';
-import { Thermometer, CloudRain, Wind, Activity, Sparkles, Satellite, Droplet, Eye } from 'lucide-react';
+import { Thermometer, CloudRain, Wind, Activity, Sparkles, Satellite, Eye } from 'lucide-react';
 
 interface UnifiedDashboardProps {
   bbox: BoundingBox;

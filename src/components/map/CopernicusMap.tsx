@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { BoundingBox, GeoPoint, GeoObservation } from '../../types/copernicus';
-import { MapPin, Layers, Square, Crosshair, Compass } from 'lucide-react';
+import { MapPin, Square, Crosshair, Compass } from 'lucide-react';
 
 interface CopernicusMapProps {
   bbox: BoundingBox;

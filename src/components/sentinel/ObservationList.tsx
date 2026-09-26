@@ -1,6 +1,6 @@
 import React from 'react';
 import { GeoObservation, MissionType } from '../../types/copernicus';
-import { Satellite, Calendar, Cloud, Info, Sparkles, Radio, Droplet, Wind, Eye } from 'lucide-react';
+import { Satellite, Calendar, Cloud, Info, Sparkles, Radio, Droplet, Wind } from 'lucide-react';
 
 interface ObservationListProps {
   observations: GeoObservation[];

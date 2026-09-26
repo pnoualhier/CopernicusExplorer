@@ -7,7 +7,7 @@ import {
   TimeSeriesPoint,
 } from '../../types/copernicus';
 import { CopernicusApiClient } from '../../services/apiClient';
-import { Sparkles, X, AlertTriangle, Send, CheckCircle2, HelpCircle } from 'lucide-react';
+import { Sparkles, X, Send, CheckCircle2, AlertTriangle } from 'lucide-react';
 
 interface AIAnalystModalProps {
   isOpen: boolean;
