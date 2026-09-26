@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <radialGradient id="spaceGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0e172a" />
+      <stop offset="70%" stop-color="#020617" />
+      <stop offset="100%" stop-color="#000208" />
+    </radialGradient>
+    <linearGradient id="earthGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0284c7" />
+      <stop offset="50%" stop-color="#0369a1" />
+      <stop offset="100%" stop-color="#0f172a" />
+    </linearGradient>
+    <linearGradient id="orbitGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.1" />
+      <stop offset="50%" stop-color="#38bdf8" stop-opacity="0.9" />
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.2" />
+    </linearGradient>
+    <linearGradient id="goldSolar" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#38bdf8" />
+      <stop offset="100%" stop-color="#0284c7" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Canvas -->
+  <rect width="512" height="512" rx="108" fill="url(#spaceGrad)" />
+  
+  <!-- Outer Tech Grid Circle -->
+  <circle cx="256" cy="256" r="220" fill="none" stroke="#1e293b" stroke-width="1.5" stroke-dasharray="4 6" opacity="0.6" />
+  <circle cx="256" cy="256" r="185" fill="none" stroke="#334155" stroke-width="1" opacity="0.4" />
+
+  <!-- Earth Globe -->
+  <circle cx="256" cy="256" r="110" fill="url(#earthGrad)" filter="url(#glow)" />
+  
+  <!-- Atmosphere Rim -->
+  <circle cx="256" cy="256" r="114" fill="none" stroke="#38bdf8" stroke-width="3" opacity="0.75" />
+
+  <!-- Continents abstract geometry -->
+  <path d="M 210,180 Q 230,170 250,190 T 280,210 T 260,260 T 220,270 Z" fill="#10b981" opacity="0.75" />
+  <path d="M 270,240 Q 300,230 330,260 T 320,310 T 280,300 Z" fill="#10b981" opacity="0.65" />
+  <path d="M 200,290 Q 220,280 240,320 T 210,340 Z" fill="#10b981" opacity="0.55" />
+
+  <!-- Orbit Ring 1 (Sentinel Polar Orbit) -->
+  <ellipse cx="256" cy="256" rx="180" ry="70" transform="rotate(-35 256 256)" fill="none" stroke="url(#orbitGrad)" stroke-width="2.5" />
+  
+  <!-- Orbit Ring 2 (Geostationary / Equatorial) -->
+  <ellipse cx="256" cy="256" rx="170" ry="60" transform="rotate(40 256 256)" fill="none" stroke="url(#orbitGrad)" stroke-width="1.8" stroke-dasharray="6 4" opacity="0.7" />
+
+  <!-- Satellite Sentinel Representation -->
+  <g transform="translate(365, 175) rotate(-25)">
+    <!-- Solar Panels -->
+    <rect x="-42" y="-12" width="28" height="24" rx="2" fill="url(#goldSolar)" stroke="#0284c7" stroke-width="1.5" />
+    <line x1="-28" y1="-12" x2="-28" y2="12" stroke="#0f172a" stroke-width="1" />
+    <rect x="14" y="-12" width="28" height="24" rx="2" fill="url(#goldSolar)" stroke="#0284c7" stroke-width="1.5" />
+    <line x1="28" y1="-12" x2="28" y2="12" stroke="#0f172a" stroke-width="1" />
+    <!-- Connector arms -->
+    <line x1="-14" y1="0" x2="-8" y2="0" stroke="#94a3b8" stroke-width="2" />
+    <line x1="8" y1="0" x2="14" y2="0" stroke="#94a3b8" stroke-width="2" />
+    <!-- Main Body Bus -->
+    <rect x="-8" y="-14" width="16" height="28" rx="3" fill="#f8fafc" stroke="#64748b" stroke-width="1.5" />
+    <!-- Sensor Aperture / SAR Antenna -->
+    <circle cx="0" cy="0" r="4" fill="#0284c7" />
+    <!-- Sensor Pulse Beam -->
+    <polygon points="-4,14 4,14 18,48 -18,48" fill="#38bdf8" opacity="0.25" />
+  </g>
+
+  <!-- Secondary Satellite -->
+  <circle cx="140" cy="320" r="5" fill="#38bdf8" filter="url(#glow)" />
+  <circle cx="140" cy="320" r="10" fill="none" stroke="#38bdf8" stroke-width="1" opacity="0.6" />
+
+  <!-- Tech crosshairs -->
+  <line x1="256" y1="36" x2="256" y2="52" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
+  <line x1="256" y1="460" x2="256" y2="476" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
+  <line x1="36" y1="256" x2="52" y2="256" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
+  <line x1="460" y1="256" x2="476" y2="256" stroke="#38bdf8" stroke-width="2" opacity="0.7" />
+</svg>

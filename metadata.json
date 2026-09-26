@@ -1,0 +1,6 @@
+{
+  "name": "Copernicus Explorer",
+  "description": "Plateforme unifiée d'observation de la Terre Copernicus : Sentinel-1/2/3/5P/6, STAC/OData, ERA5 climat, CAMS atmosphère, Marine, indices spectraux (NDVI, NDWI) et analyses IA.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

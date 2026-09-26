@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  copernicus-explorer:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: copernicus_explorer
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - COPERNICUS_CLIENT_ID=${COPERNICUS_CLIENT_ID}
+      - COPERNICUS_CLIENT_SECRET=${COPERNICUS_CLIENT_SECRET}
+      - CDS_API_KEY=${CDS_API_KEY}
+      - ADS_API_KEY=${ADS_API_KEY}
+      - REDIS_URL=redis://cache:6379
+    depends_on:
+      - cache
+    restart: unless-stopped
+
+  cache:
+    image: redis:7-alpine
+    container_name: copernicus_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+volumes:
+  redis_data:
