@@ -56,6 +56,17 @@ export const SourcesDocsView: React.FC = () => {
       ],
       url: 'https://marine.copernicus.eu',
     },
+    {
+      name: 'CARTO Basemaps & Geospatial Platform',
+      role: 'Fonds de carte vectoriels & rasters haute performance (Dark Matter, Voyager, Positron)',
+      desc: 'Fournisseur cartographique haute performance pour la visualisation de données géospatiales et satellitaires. Authentifié via la clef API CARTO.',
+      endpoints: [
+        'Dark Matter Raster Tiles : https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png?api_key=...',
+        'Voyager Raster Tiles : https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?api_key=...',
+        'Positron Raster Tiles : https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?api_key=...',
+      ],
+      url: 'https://carto.com',
+    },
   ];
 
   return (

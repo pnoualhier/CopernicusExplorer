@@ -308,6 +308,7 @@ copernicusRouter.get('/health', (req: Request, res: Response) => {
       ads: Boolean(process.env.ADS_API_KEY),
       marine: Boolean(process.env.MARINE_USERNAME && process.env.MARINE_PASSWORD),
       gemini: Boolean(process.env.GEMINI_API_KEY),
+      carto: Boolean(process.env.CARTO_API_KEY),
     },
     cache: cacheStats,
   });

@@ -26,6 +26,10 @@ ADS_API_KEY=votre_cle_ads
 MARINE_USERNAME=votre_utilisateur
 MARINE_PASSWORD=votre_mot_de_passe
 
+# CARTO Basemaps (carto.com)
+CARTO_API_KEY=cb1_401f_1_81e88d5ab80e13c7924b8b1d
+VITE_CARTO_API_KEY=cb1_401f_1_81e88d5ab80e13c7924b8b1d
+
 # Gemini AI (Analyste Environnemental)
 GEMINI_API_KEY=votre_cle_gemini
 ```

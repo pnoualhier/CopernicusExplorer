@@ -1,4 +1,5 @@
 /**
+/**
  * Copernicus Explorer - Main Application
  * Unified Earth Observation Platform for Copernicus Services & Missions
  */
@@ -24,7 +25,16 @@ import { AIAnalystModal } from './components/ai/AIAnalystModal';
 import { ProvenanceModal } from './components/common/ProvenanceModal';
 import { ExportModal } from './components/common/ExportModal';
 import { PWAInstallButton, OfflineIndicator } from './components/pwa/PWAInstallButton';
+import { CopernicusLogo } from './components/common/CopernicusLogo';
+import { HamburgerMenu } from './components/navigation/HamburgerMenu';
+import { SystemSettingsModal } from './components/system/SystemSettingsModal';
+import { ContextHelpModal } from './components/common/ContextHelpModal';
+import { OnboardingModal } from './components/common/OnboardingModal';
+import { Tooltip } from './components/common/Tooltip';
+import { useAutoUpdater } from './hooks/useAutoUpdater';
+import { useTheme } from './context/ThemeContext';
 import {
+  Menu,
   Satellite,
   Search,
   Sparkles,
@@ -34,9 +44,18 @@ import {
   Droplet,
   BookOpen,
   LayoutDashboard,
+  Settings,
+  HelpCircle,
+  Sun,
+  Moon,
+  Zap,
+  X,
 } from 'lucide-react';
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme();
+  const updater = useAutoUpdater();
+
   // Region & Map State
   const [bbox, setBbox] = useState<BoundingBox>({
     west: 3.37,
@@ -67,10 +86,27 @@ export default function App() {
     'dashboard' | 'observations' | 'climate' | 'atmosphere' | 'marine' | 'sources'
   >('dashboard');
 
-  // Modals
+  // Modals & Drawers
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [provenanceObs, setProvenanceObs] = useState<GeoObservation | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  // Auto-launch onboarding on very first visit
+  useEffect(() => {
+    try {
+      const never = localStorage.getItem('copernicus_onboarding_never');
+      const done = localStorage.getItem('copernicus_onboarding_done');
+      if (!done && !never) {
+        setIsOnboardingOpen(true);
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // Fetch observations & time series
   const fetchData = useCallback(async () => {
@@ -169,64 +205,125 @@ export default function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen w-screen bg-slate-950 text-slate-100 overflow-hidden font-sans">
+    <div className="flex flex-col h-screen w-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 overflow-hidden font-sans transition-colors duration-200">
       {/* Top Application Header */}
-      <header className="flex-shrink-0 bg-slate-900/90 border-b border-slate-800/80 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3 shadow-md z-30">
-        {/* Brand / Logo */}
+      <header className="flex-shrink-0 bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800/80 px-3 sm:px-4 py-2.5 flex items-center justify-between gap-3 shadow-sm z-30">
+        {/* Left: Hamburger Button & Logo */}
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-tr from-cyan-600 to-blue-500 p-0.5 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-            <img src="/icon.svg" alt="Copernicus Logo" className="w-full h-full object-contain" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-sm font-bold tracking-tight text-white">
-                Copernicus Explorer
-              </h1>
-              <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-950 text-cyan-300 border border-cyan-800/60 font-semibold">
-                PWA v1.0
-              </span>
+          {/* Hamburger Menu Trigger */}
+          <Tooltip content="Ouvrir le menu des fonctionnalités par catégorie" position="bottom">
+            <button
+              onClick={() => setIsHamburgerOpen(true)}
+              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition active:scale-95 relative"
+              aria-label="Menu principal"
+            >
+              <Menu className="w-5 h-5" />
+              {updater.updateAvailable && (
+                <span className="absolute 1 top-1 right-1 w-2 h-2 rounded-full bg-cyan-500 animate-ping" />
+              )}
+            </button>
+          </Tooltip>
+
+          {/* Brand Logo */}
+          <div className="flex items-center gap-2">
+            <CopernicusLogo className="w-8 h-8 flex-shrink-0 drop-shadow-md" />
+            <div>
+              <div className="flex items-center gap-1.5">
+                <h1 className="text-sm font-bold tracking-tight text-slate-900 dark:text-white">
+                  Copernicus Explorer
+                </h1>
+                <Tooltip content={`Version ${updater.currentVersion} • Publiée le ${updater.releaseDate}`}>
+                  <span className="hidden sm:inline px-1.5 py-0.5 rounded text-[10px] font-mono bg-cyan-100 dark:bg-cyan-950 text-cyan-800 dark:text-cyan-300 border border-cyan-300 dark:border-cyan-800/60 font-semibold cursor-help">
+                    v{updater.currentVersion}
+                  </span>
+                </Tooltip>
+              </div>
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 hidden md:block">
+                Observation de la Terre • Sentinel 1-6 • ERA5 • CAMS • Marine
+              </p>
             </div>
-            <p className="text-[10px] text-slate-400 hidden sm:block">
-              Observation de la Terre • Sentinel 1-6 • ERA5 • CAMS • Marine
-            </p>
           </div>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={handleLocationSearch} className="flex-1 max-w-sm mx-2">
-          <div className="relative flex items-center">
-            <Search className="w-3.5 h-3.5 absolute left-3 text-slate-400 pointer-events-none" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Rechercher une ville ou lat, lng (ex: Montpellier)..."
-              className="w-full bg-slate-950/80 border border-slate-700/80 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 outline-none focus:border-cyan-500 placeholder-slate-500 transition font-mono"
-            />
-          </div>
+          <Tooltip content="Recherchez un toponyme ou saisissez des coordonnées GPS (lat, lng)" position="bottom" className="w-full">
+            <div className="relative flex items-center w-full">
+              <Search className="w-3.5 h-3.5 absolute left-3 text-slate-400 pointer-events-none" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Rechercher une ville ou lat, lng (ex: Montpellier)..."
+                className="w-full bg-slate-100 dark:bg-slate-950/80 border border-slate-300 dark:border-slate-700/80 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-900 dark:text-slate-200 outline-none focus:border-cyan-500 placeholder-slate-400 dark:placeholder-slate-500 transition font-mono"
+              />
+            </div>
+          </Tooltip>
         </form>
 
         {/* Header Right Actions */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1.5 sm:gap-2">
           {/* AI Trigger */}
-          <button
-            onClick={() => setIsAiModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600/90 to-blue-600/90 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold shadow-sm transition active:scale-95"
-            title="Ouvrir l'analyste environnemental IA Gemini"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
-            <span className="hidden md:inline">Analyste IA</span>
-          </button>
+          <Tooltip content="Consulter l'Analyste Environnemental IA Gemini" position="bottom">
+            <button
+              onClick={() => setIsAiModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white text-xs font-semibold shadow-sm transition active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5 text-cyan-200" />
+              <span className="hidden lg:inline">Analyste IA</span>
+            </button>
+          </Tooltip>
 
           {/* Export Button */}
-          <button
-            onClick={() => setIsExportModalOpen(true)}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium border border-slate-700/80 transition active:scale-95"
-            title="Exporter les données (GeoJSON, CSV, JSON, Rapport PDF)"
-          >
-            <Download className="w-3.5 h-3.5" />
-            <span className="hidden md:inline">Exporter</span>
-          </button>
+          <Tooltip content="Exporter les données (GeoJSON, CSV, JSON, Synthèse)" position="bottom">
+            <button
+              onClick={() => setIsExportModalOpen(true)}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-medium border border-slate-300 dark:border-slate-700/80 transition active:scale-95"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span className="hidden lg:inline">Exporter</span>
+            </button>
+          </Tooltip>
+
+          {/* Theme Toggle Button */}
+          <Tooltip content={theme === 'dark' ? 'Passer au Thème Clair' : 'Passer au Thème Sombre'} position="bottom">
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Basculer le thème"
+            >
+              {theme === 'dark' ? (
+                <Sun className="w-4 h-4 text-amber-400" />
+              ) : (
+                <Moon className="w-4 h-4 text-cyan-600" />
+              )}
+            </button>
+          </Tooltip>
+
+          {/* Help Button */}
+          <Tooltip content="Aide contextuelle & Glossaire technique" position="bottom">
+            <button
+              onClick={() => setIsHelpModalOpen(true)}
+              className="p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Aide scientifique"
+            >
+              <HelpCircle className="w-4 h-4 text-emerald-500" />
+            </button>
+          </Tooltip>
+
+          {/* System Settings Button */}
+          <Tooltip content="Paramètres Système & Mises à jour" position="bottom">
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="relative p-1.5 rounded-lg text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+              aria-label="Paramètres système"
+            >
+              <Settings className="w-4 h-4 text-slate-500 dark:text-slate-300" />
+              {updater.updateAvailable && (
+                <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-cyan-400 animate-ping" />
+              )}
+            </button>
+          </Tooltip>
 
           {/* PWA Install Button */}
           <PWAInstallButton />
@@ -234,87 +331,111 @@ export default function App() {
       </header>
 
       {/* Navigation Tab Bar */}
-      <nav className="flex-shrink-0 bg-slate-950/90 border-b border-slate-800/80 px-3 sm:px-4 py-1 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar z-20 text-xs">
+      <nav className="flex-shrink-0 bg-slate-100 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 px-3 sm:px-4 py-1 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar z-20 text-xs">
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => setActiveTab('dashboard')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'dashboard'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <LayoutDashboard className="w-3.5 h-3.5" />
-            <span>Dashboard Unifié</span>
-          </button>
+          <Tooltip content="Vue d'ensemble cartographique et télédétection multi-capteurs">
+            <button
+              onClick={() => setActiveTab('dashboard')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'dashboard'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <LayoutDashboard className="w-3.5 h-3.5" />
+              <span>Dashboard Unifié</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTab('observations')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'observations'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <Satellite className="w-3.5 h-3.5" />
-            <span>Missions Sentinel</span>
-          </button>
+          <Tooltip content="Images satellitaires Sentinel-1 (Radar) et Sentinel-2 (Optique)">
+            <button
+              onClick={() => setActiveTab('observations')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'observations'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <Satellite className="w-3.5 h-3.5" />
+              <span>Missions Sentinel</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTab('climate')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'climate'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <Thermometer className="w-3.5 h-3.5" />
-            <span>Climat & Météo (ERA5)</span>
-          </button>
+          <Tooltip content="Réanalyses climatiques ECMWF ERA5 (Températures, Précipitations, Anomalies)">
+            <button
+              onClick={() => setActiveTab('climate')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'climate'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <Thermometer className="w-3.5 h-3.5" />
+              <span>Climat & Météo (ERA5)</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTab('atmosphere')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'atmosphere'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <Wind className="w-3.5 h-3.5" />
-            <span>Atmosphère (CAMS)</span>
-          </button>
+          <Tooltip content="Surveillance de l'atmosphère CAMS (NO2, Ozone, PM2.5, PM10)">
+            <button
+              onClick={() => setActiveTab('atmosphere')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'atmosphere'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <Wind className="w-3.5 h-3.5" />
+              <span>Atmosphère (CAMS)</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTab('marine')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'marine'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <Droplet className="w-3.5 h-3.5" />
-            <span>Océans & Altimétrie</span>
-          </button>
+          <Tooltip content="Milieu marin CMS (Température de surface de mer SST, Vagues, Altimétrie)">
+            <button
+              onClick={() => setActiveTab('marine')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'marine'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <Droplet className="w-3.5 h-3.5" />
+              <span>Océans & Altimétrie</span>
+            </button>
+          </Tooltip>
 
-          <button
-            onClick={() => setActiveTab('sources')}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
-              activeTab === 'sources'
-                ? 'bg-cyan-600 text-white shadow-sm'
-                : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
-            }`}
-          >
-            <BookOpen className="w-3.5 h-3.5" />
-            <span>Sources & APIs</span>
-          </button>
+          <Tooltip content="Documentation officielle des APIs Copernicus CDSE, ECMWF & CARTO">
+            <button
+              onClick={() => setActiveTab('sources')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'sources'
+                  ? 'bg-cyan-600 text-white shadow-sm'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <BookOpen className="w-3.5 h-3.5" />
+              <span>Sources & APIs</span>
+            </button>
+          </Tooltip>
         </div>
 
-        {/* Data Source Mode Indicator */}
-        <div className="flex items-center gap-2 font-mono text-[11px] text-slate-400 flex-shrink-0">
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="hidden sm:inline">
-            Mode Copernicus : {dataSourceMode === 'LIVE' ? 'CDSE Live' : 'Simulation Scientifique Réaliste'}
-          </span>
+        {/* Right Info: Data Source & Update Status Indicator */}
+        <div className="flex items-center gap-3 font-mono text-[11px] text-slate-500 dark:text-slate-400 flex-shrink-0">
+          {updater.updateAvailable && (
+            <button
+              onClick={() => setIsSettingsModalOpen(true)}
+              className="hidden sm:flex items-center gap-1 text-[11px] text-cyan-600 dark:text-cyan-400 font-semibold hover:underline"
+            >
+              <Zap className="w-3 h-3 text-cyan-500 animate-bounce" />
+              <span>Mise à jour dispo</span>
+            </button>
+          )}
+
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="hidden sm:inline">
+              Mode Copernicus : {dataSourceMode === 'LIVE' ? 'CDSE Live' : 'Simulation Scientifique Réaliste'}
+            </span>
+          </div>
         </div>
       </nav>
 
@@ -371,7 +492,7 @@ export default function App() {
                   onOpenAI={() => setIsAiModalOpen(true)}
                 />
               ) : (
-                <div className="h-full bg-slate-900 border border-slate-800 rounded-xl flex items-center justify-center text-slate-400 text-xs">
+                <div className="h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-center text-slate-400 text-xs">
                   Sélectionnez une observation dans la liste pour l'examiner.
                 </div>
               )}
@@ -421,10 +542,77 @@ export default function App() {
         />
       </footer>
 
+      {/* Background Update Notification Toast */}
+      {updater.backgroundInstalled && (
+        <div className="fixed bottom-14 right-4 z-40 bg-slate-900 text-slate-100 border border-cyan-500/60 rounded-xl p-3 shadow-2xl flex items-center gap-3 animate-in slide-in-from-bottom-3 max-w-md">
+          <div className="p-2 rounded-lg bg-cyan-500/20 text-cyan-400">
+            <Zap className="w-4 h-4 animate-bounce" />
+          </div>
+          <div className="text-xs flex-1">
+            <div className="font-semibold text-slate-100 flex items-center gap-1.5">
+              <span>Mise à jour prête en arrière-plan</span>
+              <span className="font-mono text-[10px] text-cyan-400">v{updater.latestVersion}</span>
+            </div>
+            <div className="text-[11px] text-slate-400">
+              Téléchargée et installée automatiquement.
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5">
+            <button
+              onClick={updater.forceUpdate}
+              className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-semibold rounded-lg shadow-sm transition"
+            >
+              Appliquer
+            </button>
+            <button
+              onClick={updater.dismissBackgroundToast}
+              className="text-slate-400 hover:text-slate-200 p-1 rounded-lg"
+              title="Fermer"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Offline Toast Indicator */}
       <OfflineIndicator />
 
-      {/* Modals */}
+      {/* Hamburger Navigation Drawer */}
+      <HamburgerMenu
+        isOpen={isHamburgerOpen}
+        onClose={() => setIsHamburgerOpen(false)}
+        activeTab={activeTab}
+        onSelectTab={setActiveTab}
+        onOpenAI={() => setIsAiModalOpen(true)}
+        onOpenExport={() => setIsExportModalOpen(true)}
+        onOpenSettings={() => setIsSettingsModalOpen(true)}
+        onOpenHelp={() => setIsHelpModalOpen(true)}
+        onOpenOnboarding={() => setIsOnboardingOpen(true)}
+        updateAvailable={updater.updateAvailable}
+      />
+
+      {/* System Settings Modal */}
+      <SystemSettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        updater={updater}
+      />
+
+      {/* Context Help & Scientific Glossary Modal */}
+      <ContextHelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setIsHelpModalOpen(false)}
+        onStartOnboarding={() => setIsOnboardingOpen(true)}
+      />
+
+      {/* Interactive Onboarding Tour Modal */}
+      <OnboardingModal
+        isOpen={isOnboardingOpen}
+        onClose={() => setIsOnboardingOpen(false)}
+      />
+
+      {/* AI Analyst Modal */}
       <AIAnalystModal
         isOpen={isAiModalOpen}
         onClose={() => setIsAiModalOpen(false)}
@@ -436,12 +624,14 @@ export default function App() {
         timeSeries={timeSeries}
       />
 
+      {/* Data Provenance Modal */}
       <ProvenanceModal
         isOpen={!!provenanceObs}
         observation={provenanceObs}
         onClose={() => setProvenanceObs(null)}
       />
 
+      {/* Multi-Format Export Modal */}
       <ExportModal
         isOpen={isExportModalOpen}
         onClose={() => setIsExportModalOpen(false)}

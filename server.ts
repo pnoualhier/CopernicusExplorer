@@ -9,6 +9,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { copernicusRouter } from './backend/routes/copernicusRouter';
+import { systemRouter } from './backend/routes/systemRouter';
 
 dotenv.config();
 
@@ -32,6 +33,7 @@ async function startServer() {
 
   // Mount unified Copernicus API proxy routes
   app.use('/api/copernicus', copernicusRouter);
+  app.use('/api/system', systemRouter);
 
   // Frontend integration: Vite middleware in development, static files in production
   if (process.env.NODE_ENV === 'production') {

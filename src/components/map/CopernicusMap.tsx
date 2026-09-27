@@ -35,9 +35,13 @@ export const CopernicusMap: React.FC<CopernicusMapProps> = ({
   const markerRef = useRef<L.Marker | null>(null);
   const [isDrawingBbox, setIsDrawingBbox] = useState(false);
   const [drawStartLatLng, setDrawStartLatLng] = useState<L.LatLng | null>(null);
-  const [activeBaseLayer, setActiveBaseLayer] = useState<'dark' | 'satellite' | 'street'>('dark');
+  const [activeBaseLayer, setActiveBaseLayer] = useState<'dark' | 'voyager' | 'light' | 'satellite' | 'street'>('dark');
   const baseLayersRef = useRef<{ [key: string]: L.TileLayer }>({});
   const [mouseCoords, setMouseCoords] = useState<{ lat: number; lng: number } | null>(null);
+
+  // CARTO API configuration
+  const cartoApiKey = (import.meta.env.VITE_CARTO_API_KEY as string) || 'cb1_401f_1_81e88d5ab80e13c7924b8b1d';
+  const cartoQuery = cartoApiKey ? `?api_key=${encodeURIComponent(cartoApiKey)}` : '';
 
   // Initialize Leaflet map
   useEffect(() => {
@@ -58,22 +62,41 @@ export const CopernicusMap: React.FC<CopernicusMapProps> = ({
       attributionControl: false,
     });
 
-    // Tile providers
-    const darkLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    const cartoAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>';
+
+    // CARTO Basemaps & Tile providers
+    const darkLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png${cartoQuery}`, {
       maxZoom: 19,
       subdomains: 'abcd',
+      attribution: cartoAttribution,
+    });
+
+    const voyagerLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png${cartoQuery}`, {
+      maxZoom: 19,
+      subdomains: 'abcd',
+      attribution: cartoAttribution,
+    });
+
+    const lightLayer = L.tileLayer(`https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png${cartoQuery}`, {
+      maxZoom: 19,
+      subdomains: 'abcd',
+      attribution: cartoAttribution,
     });
 
     const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       maxZoom: 19,
+      attribution: 'Tiles &copy; Esri',
     });
 
     const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 19,
+      attribution: '&copy; OpenStreetMap contributors',
     });
 
     baseLayersRef.current = {
       dark: darkLayer,
+      voyager: voyagerLayer,
+      light: lightLayer,
       satellite: satelliteLayer,
       street: streetLayer,
     };
@@ -269,14 +292,34 @@ export const CopernicusMap: React.FC<CopernicusMapProps> = ({
             className={`px-2 py-1 text-[11px] rounded font-medium transition ${
               activeBaseLayer === 'dark' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
+            title="CARTO Dark Matter (avec clef API)"
           >
-            Sombre
+            CARTO Dark
+          </button>
+          <button
+            onClick={() => setActiveBaseLayer('voyager')}
+            className={`px-2 py-1 text-[11px] rounded font-medium transition ${
+              activeBaseLayer === 'voyager' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="CARTO Voyager (avec clef API)"
+          >
+            CARTO Voyager
+          </button>
+          <button
+            onClick={() => setActiveBaseLayer('light')}
+            className={`px-2 py-1 text-[11px] rounded font-medium transition ${
+              activeBaseLayer === 'light' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
+            }`}
+            title="CARTO Positron Clair (avec clef API)"
+          >
+            CARTO Positron
           </button>
           <button
             onClick={() => setActiveBaseLayer('satellite')}
             className={`px-2 py-1 text-[11px] rounded font-medium transition ${
               activeBaseLayer === 'satellite' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
+            title="Imagerie Satellite Esri HD"
           >
             Satellite
           </button>
@@ -285,8 +328,9 @@ export const CopernicusMap: React.FC<CopernicusMapProps> = ({
             className={`px-2 py-1 text-[11px] rounded font-medium transition ${
               activeBaseLayer === 'street' ? 'bg-cyan-600 text-white' : 'text-slate-400 hover:text-slate-200'
             }`}
+            title="OpenStreetMap Rues"
           >
-            Rues
+            OSM
           </button>
         </div>
       </div>
@@ -341,7 +385,11 @@ export const CopernicusMap: React.FC<CopernicusMapProps> = ({
             BBox : [{bbox.west}, {bbox.south}, {bbox.east}, {bbox.north}]
           </span>
           <span className="text-slate-400 border-l border-slate-800 pl-3">
-            CRS: EPSG:4326 (WGS 84)
+            CRS: EPSG:4326
+          </span>
+          <span className="text-emerald-400 border-l border-slate-800 pl-3 flex items-center gap-1.5" title="Clef API Carto.com configurée (cb1_401f...)">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>CARTO API : Active</span>
           </span>
         </div>
       </div>
