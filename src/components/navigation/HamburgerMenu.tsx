@@ -1,6 +1,8 @@
 import React from 'react';
 import {
   X,
+  Globe2,
+  FolderKanban,
   LayoutDashboard,
   Satellite,
   Thermometer,
@@ -96,6 +98,52 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
               <span>Observation & Télédétection</span>
             </div>
             <div className="space-y-1">
+              <button
+                onClick={() => handleNavigate(() => onSelectTab('map'))}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  activeTab === 'map'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Globe2 className="w-4 h-4 text-cyan-400" />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <span>Studio Cartographique</span>
+                      <span className="text-[9px] font-mono bg-cyan-950 text-cyan-300 px-1 rounded border border-cyan-800">
+                        Centre
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">Dessin → Données → Analyse Immédiate</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate(() => onSelectTab('project'))}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  activeTab === 'project'
+                    ? 'bg-cyan-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <FolderKanban className="w-4 h-4 text-cyan-400" />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5 font-semibold">
+                      <span>Projet d'Analyse</span>
+                      <span className="text-[9px] font-mono bg-cyan-950 text-cyan-300 px-1 rounded border border-cyan-800">
+                        Workflow
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">Projet → Zone → Données → Analyses → Résultats → Rapport</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
               <button
                 onClick={() => handleNavigate(() => onSelectTab('dashboard'))}
                 className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${

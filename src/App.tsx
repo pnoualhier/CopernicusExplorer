@@ -33,8 +33,15 @@ import { OnboardingModal } from './components/common/OnboardingModal';
 import { Tooltip } from './components/common/Tooltip';
 import { useAutoUpdater } from './hooks/useAutoUpdater';
 import { useTheme } from './context/ThemeContext';
+import { ProjectWorkspace } from './components/project/ProjectWorkspace';
+import { NewProjectModal } from './components/project/NewProjectModal';
+import { InteractiveMapStudio } from './components/map/InteractiveMapStudio';
+import { ProjectService } from './services/projectService';
+import { AnalysisProject } from './types/project';
 import {
   Menu,
+  Globe2,
+  FolderKanban,
   Satellite,
   Search,
   Sparkles,
@@ -56,21 +63,21 @@ export default function App() {
   const { theme, toggleTheme } = useTheme();
   const updater = useAutoUpdater();
 
+  // Projects State
+  const [projects, setProjects] = useState<AnalysisProject[]>(() => ProjectService.getAllProjects());
+  const [activeProject, setActiveProject] = useState<AnalysisProject>(() => ProjectService.getActiveProject());
+  const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
+
   // Region & Map State
-  const [bbox, setBbox] = useState<BoundingBox>({
-    west: 3.37,
-    south: 43.10,
-    east: 4.37,
-    north: 44.10,
-  });
-  const [point, setPoint] = useState<GeoPoint>({ lat: 43.60, lng: 3.87 });
-  const [locationName, setLocationName] = useState('Sud de la France / Occitanie');
+  const [bbox, setBbox] = useState<BoundingBox>(() => activeProject.zone.bbox);
+  const [point, setPoint] = useState<GeoPoint>(() => activeProject.zone.center);
+  const [locationName, setLocationName] = useState(() => activeProject.zone.name);
   const [searchQuery, setSearchQuery] = useState('');
 
   // Temporal & Mission Filters
-  const [startDate, setStartDate] = useState('2024-01-01');
-  const [endDate, setEndDate] = useState('2024-12-31');
-  const [selectedMission, setSelectedMission] = useState<MissionType>('SENTINEL-2');
+  const [startDate, setStartDate] = useState(() => activeProject.dataConfig.startDate);
+  const [endDate, setEndDate] = useState(() => activeProject.dataConfig.endDate);
+  const [selectedMission, setSelectedMission] = useState<MissionType>(() => activeProject.dataConfig.missions[0] || 'SENTINEL-2');
   const [cloudCoverMax, setCloudCoverMax] = useState(30);
 
   // Data State
@@ -83,8 +90,8 @@ export default function App() {
 
   // Navigation
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'observations' | 'climate' | 'atmosphere' | 'marine' | 'sources'
-  >('dashboard');
+    'map' | 'project' | 'dashboard' | 'observations' | 'climate' | 'atmosphere' | 'marine' | 'sources'
+  >('map');
 
   // Modals & Drawers
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
@@ -94,6 +101,58 @@ export default function App() {
   const [isAiModalOpen, setIsAiModalOpen] = useState(false);
   const [provenanceObs, setProvenanceObs] = useState<GeoObservation | null>(null);
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+
+  // Project Handlers
+  const handleSelectProject = (id: string) => {
+    ProjectService.setActiveProjectId(id);
+    const found = projects.find((p) => p.id === id);
+    if (found) {
+      setActiveProject(found);
+      setBbox(found.zone.bbox);
+      setPoint(found.zone.center);
+      setLocationName(found.zone.name);
+      setStartDate(found.dataConfig.startDate);
+      setEndDate(found.dataConfig.endDate);
+      setSelectedMission(found.dataConfig.missions[0] || 'SENTINEL-2');
+    }
+  };
+
+  const handleUpdateProject = (updated: AnalysisProject) => {
+    ProjectService.saveProject(updated);
+    setProjects(ProjectService.getAllProjects());
+    setActiveProject(updated);
+    setBbox(updated.zone.bbox);
+    setPoint(updated.zone.center);
+    setLocationName(updated.zone.name);
+    setStartDate(updated.dataConfig.startDate);
+    setEndDate(updated.dataConfig.endDate);
+  };
+
+  const handleCreateNewProject = (params: {
+    title: string;
+    description: string;
+    theme: AnalysisProject['theme'];
+    locationName?: string;
+  }) => {
+    const created = ProjectService.createNewProject({
+      ...params,
+      center: point,
+    });
+    setProjects(ProjectService.getAllProjects());
+    setActiveProject(created);
+    setBbox(created.zone.bbox);
+    setPoint(created.zone.center);
+    setLocationName(created.zone.name);
+  };
+
+  const handleResetDefaults = () => {
+    const reset = ProjectService.resetToDefaults();
+    setProjects(reset);
+    setActiveProject(reset[0]);
+    setBbox(reset[0].zone.bbox);
+    setPoint(reset[0].zone.center);
+    setLocationName(reset[0].zone.name);
+  };
 
   // Auto-launch onboarding on very first visit
   useEffect(() => {
@@ -333,6 +392,40 @@ export default function App() {
       {/* Navigation Tab Bar */}
       <nav className="flex-shrink-0 bg-slate-100 dark:bg-slate-950/90 border-b border-slate-200 dark:border-slate-800/80 px-3 sm:px-4 py-1 flex items-center justify-between gap-2 overflow-x-auto no-scrollbar z-20 text-xs">
         <div className="flex items-center gap-1">
+          <Tooltip content="Studio Cartographique Central : Sélection de zone (point, rectangle, polygone, cercle, commune, département, région, pays) → Données → Analyse immédiate">
+            <button
+              onClick={() => setActiveTab('map')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition ${
+                activeTab === 'map'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md ring-1 ring-cyan-400'
+                  : 'text-cyan-700 dark:text-cyan-400 hover:text-cyan-900 dark:hover:text-cyan-200 hover:bg-cyan-50 dark:hover:bg-cyan-950/40'
+              }`}
+            >
+              <Globe2 className="w-3.5 h-3.5" />
+              <span>Studio Carte</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 hidden sm:inline">
+                Centre
+              </span>
+            </button>
+          </Tooltip>
+
+          <Tooltip content="Workflow central d'étude : Projet → Zone d'étude → Données → Analyses → Résultats → Rapport">
+            <button
+              onClick={() => setActiveTab('project')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition ${
+                activeTab === 'project'
+                  ? 'bg-cyan-600 text-white shadow-sm ring-1 ring-cyan-500'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-900'
+              }`}
+            >
+              <FolderKanban className="w-3.5 h-3.5" />
+              <span>Projet d'Analyse</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 hidden sm:inline">
+                Workflow
+              </span>
+            </button>
+          </Tooltip>
+
           <Tooltip content="Vue d'ensemble cartographique et télédétection multi-capteurs">
             <button
               onClick={() => setActiveTab('dashboard')}
@@ -441,6 +534,32 @@ export default function App() {
 
       {/* Main View Area */}
       <main className="flex-1 flex flex-col overflow-hidden relative">
+        {activeTab === 'map' && (
+          <InteractiveMapStudio
+            initialBbox={bbox}
+            initialPoint={point}
+            onSelectZone={(newBbox, newPoint, name) => {
+              setBbox(newBbox);
+              setPoint(newPoint);
+              setLocationName(name);
+            }}
+            onOpenAI={() => setIsAiModalOpen(true)}
+          />
+        )}
+
+        {activeTab === 'project' && (
+          <ProjectWorkspace
+            project={activeProject}
+            projects={projects}
+            onSelectProject={handleSelectProject}
+            onUpdateProject={handleUpdateProject}
+            onCreateProject={() => setIsNewProjectModalOpen(true)}
+            onResetDefaults={handleResetDefaults}
+            onOpenAI={() => setIsAiModalOpen(true)}
+            onExportGeoJson={() => setIsExportModalOpen(true)}
+          />
+        )}
+
         {activeTab === 'dashboard' && (
           <UnifiedDashboard
             bbox={bbox}
@@ -642,6 +761,13 @@ export default function App() {
         endDate={endDate}
         observations={observations}
         timeSeries={timeSeries}
+      />
+
+      {/* New Project Creation Modal */}
+      <NewProjectModal
+        isOpen={isNewProjectModalOpen}
+        onClose={() => setIsNewProjectModalOpen(false)}
+        onCreate={handleCreateNewProject}
       />
     </div>
   );

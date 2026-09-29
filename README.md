@@ -26,6 +26,8 @@
 
 ## 📑 Table des Matières
 
+- [🗺️ Studio Carte : Le Cœur Interactif de l'Application](#️-studio-carte--le-cœur-interactif-de-lapplication)
+- [🔬 Workflow Central : Projet d'Analyse](#-workflow-central--projet-danalyse)
 - [✨ Fonctionnalités Principales](#-fonctionnalités-principales)
 - [🧭 Menu Hamburger par Catégories](#-menu-hamburger-par-catégories)
 - [⚙️ Paramètres Système & Mises à Jour Automatiques](#-paramètres-système--mises-à-jour-automatiques)
@@ -36,6 +38,94 @@
 - [📐 Architecture & Technologies](#-architecture--technologies)
 - [📡 API Système & Endpoints](#-api-système--endpoints)
 - [🛠️ Installation & Démarrage](#-installation--démarrage)
+
+---
+
+## 🗺️ Studio Carte : Le Cœur Interactif de l'Application
+
+La carte devient le **véritable centre de gravité** de l'expérience utilisateur, avec une boucle d'interaction immédiate :
+
+$$\textbf{Je dessine une zone} \quad\longrightarrow\quad \textbf{Je choisis une donnée} \quad\longrightarrow\quad \textbf{Je clique une analyse} \quad\longrightarrow\quad \textbf{J'obtiens instantanément le résultat}$$
+
+### 1. Sélection Géométrique & Territoriale d'une Zone
+- 📍 **Point** : Inspection ponctuelle d'un pixel ou sonde spectrale de terrain.
+- ⬛ **Rectangle** : Emprise Bounding Box tracée en glissant la souris sur la carte.
+- 📐 **Polygone** : Dessin libre multipoints avec calcul en temps réel de la superficie ($\text{km}^2$).
+- ⭕ **Cercle** : Zone radiale paramétrable en kilomètres (ex: rayon de 5 km à 100 km).
+- 🏛️ **Entités Administratives Intégrées** :
+  - **Communes** : Toulouse, Montpellier, Bordeaux, Paris, Marseille, Lyon, Nantes, Nice, Strasbourg, etc.
+  - **Départements** : Haute-Garonne (31), Hérault (34), Gironde (33), Bouches-du-Rhône (13), Rhône (69), etc.
+  - **Régions** : Occitanie, Nouvelle-Aquitaine, PACA, Auvergne-Rhône-Alpes, Île-de-France, Bretagne, etc.
+  - **Pays** : France, Espagne, Italie, Allemagne, Suisse, Belgique, etc.
+
+### 2. Choix Direct des Données Satellitaires & Climat
+- 🛰️ **Sentinel-1** (Radar SAR C-band, tout-temps jour/nuit)
+- 🛰️ **Sentinel-2** (Optique multispectrale haute résolution 10m L2A BOA)
+- 🛰️ **Sentinel-3** (Surveillance globale des océans et continents OLCI/SLSTR)
+- 🌡️ **ERA5** (Réanalyses atmosphériques horaires mondiales ECMWF C3S)
+- 💨 **CAMS** (Atmosphère & Qualité de l'air : NO2, Ozone, PM2.5, PM10)
+- 🌊 **Marine** (Copernicus Marine Service CMS, SST, vagues)
+- 🌍 **Autres Données** (Corine Land Cover, DEM élévation)
+
+### 3. Analyses Immédiates en 1 Clic
+- 🌿 **NDVI** (Normalized Difference Vegetation Index) : Évaluation de la biomasse et santé foliaire.
+- 💧 **NDWI** (Normalized Difference Water Index) : Stress hydrique et détection des plans d'eau.
+- 🔥 **NBR** (Normalized Burn Ratio) : Sévérité des brûlis et cicatrices d'incendies.
+- 🌱 **EVI** (Enhanced Vegetation Index) : Végétation corrigée des aérosols atmosphériques.
+- 🌡️ **Température** : Température moyenne de surface ERA5 et écarts à la normale saisonnière.
+- 🌧️ **Précipitations** : Cumul pluviométrique et bilans hydriques modélisés.
+- 💨 **Humidité** : Humidité relative de l'air et réserve utile dans le sol.
+- 🏭 **Pollution** : Niveaux de polluants troposphériques CAMS.
+- 📈 **Évolution Temporelle** : Tendance continue et sparkline chronologique sur la zone.
+
+### 4. Panneau Flottant « Résultat Immédiat »
+Dès qu'une zone est tracée et qu'une analyse est sélectionnée, le panneau HUD affiche en surimpression :
+- La valeur exacte calculée (ex: $\text{NDVI} = 0.72$, Statut "Végétation très saine & dense").
+- L'échelle étalonnée colorimétrique.
+- L'interprétation scientifique contextualisée aux $\text{km}^2$ sélectionnés.
+- Le mini-profil temporel sur 12 mois.
+- Des raccourcis d'export direct en **GeoJSON** et consultation de l'Analyste IA Gemini.
+
+---
+
+## 🔬 Workflow Central : Projet d'Analyse
+
+Copernicus Explorer s'articule autour d'une **démarche scientifique de bout-en-bout**, transformant les données satellitaires brutes en rapports d'expertise territoriale :
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  1. PROJET   │ ──> │ 2. ZONE D'ÉT.│ ──> │  3. DONNÉES  │
+└──────────────┘     └──────────────┘     └──────────────┘
+       │                                         │
+       ▼                                         ▼
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│  4. ANALYSES │ ──> │ 5. RÉSULTATS │ ──> │  6. RAPPORT  │
+└──────────────┘     └──────────────┘     └──────────────┘
+```
+
+### Cas d'usage type : *« Évolution de la végétation autour de Toulouse (2018 → 2026) »*
+
+1. **1. Projet (Conception & Objectifs)** :
+   - Fiche d'identité du projet, problématique de recherche, thématique scientifique (*Végétation & Agriculture*).
+   - Bibliothèque de projets types (Toulouse 2018-2026, Massif forestier de Gironde 2020-2026, Camargue deltaïque 2019-2026) ou création d'une étude libre.
+2. **2. Zone d'étude (Périmètre géographique & CARTO)** :
+   - Emprise Bounding Box WGS84 définie sur les fonds de carte CARTO (ex: Bassin toulousain & Lauragais, ~485 km²).
+   - Coordonnées exactes du centre, altitude moyenne et caractérisation de l'écorégion.
+3. **3. Données (Ingestion & Période)** :
+   - Sélection multi-capteurs : **Sentinel-2** (Optique 10m L2A BOA), **ERA5-Land** (Réanalyses horaires à 2m ECMWF), **CAMS** (Qualité de l'air).
+   - Fenêtre temporelle : **2018 → 2026** (312 scènes satellitaires indexées).
+   - Filtrage qualité (couverture nuageuse max 20%, masque SCL).
+4. **4. Analyses (Traitements spectraux & Corrélations)** :
+   - Calcul des indices biophysiques : **NDVI** (vigueur végétale), **NDWI** (stress hydrique), **NBR** (sévérité de brûlis).
+   - Corrélations croisées : $r = -0.76$ (Végétation vs Canicules), $r = +0.81$ (Végétation vs Pluviométrie).
+   - Recensement automatique des événements extrêmes : Canicule & sécheresse historique 2022 (chute du NDVI de 35%), déficit hivernal 2023, rebond printanier 2024-2026.
+5. **5. Résultats (Comparaisons temporelles & Bilans)** :
+   - Benchmark temporel à trois jalons : Référence 2018 ($NDVI = 0.73$) vs Crise 2022 ($NDVI = 0.45$) vs Rétablissement 2026 ($NDVI = 0.70$).
+   - Tableau de bord des 9 années d'historique avec statuts écologiques.
+   - Histogramme comparatif et trajectoire de résilience.
+6. **6. Rapport (Rapport Scientifique Final & Export)** :
+   - Document de synthèse officiel avec résumé exécutif, traçabilité des données, résultats clés et recommandations d'action territoriale.
+   - Export en **PDF / Impression**, **Markdown (.md)**, **Dossier de projet complet (.json)** et **Données SIG (GeoJSON + CSV)**.
 
 ---
 
