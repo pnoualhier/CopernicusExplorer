@@ -27,6 +27,8 @@
 ## 📑 Table des Matières
 
 - [🗺️ Studio Carte : Le Cœur Interactif de l'Application](#️-studio-carte--le-cœur-interactif-de-lapplication)
+- [🛰️ Vignettes Satellites & Comparateur Bi-Date (2020 | 2026)](#️-vignettes-satellites--comparateur-bi-date-2020--2026)
+- [📈 Moteur Temporel Statistique & Climatologie (2018–2026)](#-moteur-temporel-statistique--climatologie-20182026)
 - [🔬 Workflow Central : Projet d'Analyse](#-workflow-central--projet-danalyse)
 - [✨ Fonctionnalités Principales](#-fonctionnalités-principales)
 - [🧭 Menu Hamburger par Catégories](#-menu-hamburger-par-catégories)
@@ -85,6 +87,70 @@ Dès qu'une zone est tracée et qu'une analyse est sélectionnée, le panneau HU
 - L'interprétation scientifique contextualisée aux $\text{km}^2$ sélectionnés.
 - Le mini-profil temporel sur 12 mois.
 - Des raccourcis d'export direct en **GeoJSON** et consultation de l'Analyste IA Gemini.
+
+---
+
+## 🛰️ Vignettes Satellites & Comparateur Bi-Date (2020 | 2026)
+
+Chaque scène dispose désormais de sa **vignette multispectrale interactive**, ainsi que d'un studio dédié de **comparaison bi-temporelle** à curseur vertical pour détecter et quantifier les changements environnementaux majeurs.
+
+### 1. Cinq Rendus Spectraux Essentiels
+- 🌍 **RGB (Vraie Couleur)** : Synthèse naturelle des bandes B04 (Rouge), B03 (Vert), B02 (Bleu) à 10 m de résolution.
+- 🍁 **False Color (Color Infrared NIR)** : Bande B08 (Proche Infrarouge) assignée au canal rouge. Révèle la vigueur chlorophyllienne en rouge vermillon et magnifie la structure de la canopée.
+- 🌿 **NDVI (Indice de Végétation par Différence Normalisée)** : $(B08 - B04) / (B08 + B04)$ avec palette étalonnée (sol nu ocre $\rightarrow$ forêt dense vert émeraude).
+- 🔥 **SWIR (Infrarouge Ondes Courtes)** : Composite B12, B8A, B04. Pénètre les fumées d'incendies et la brume atmosphérique, isole les sols calcinés en cuivre/rouille, l'eau en noir profond et les surfaces minérales/bâties.
+- 💧 **NDWI (Indice d'Eau et d'Humidité)** : $(B03 - B08) / (B03 + B08)$. Contraste maximal entre les plans d'eau libres en bleu électrique et les terres émergées.
+
+### 2. Curseur d'Opacité Continu
+$$\text{Opacité : } 0\% \quad \textbf{━━━━━●━━} \quad 100\%$$
+Permet de doser la transparence spectrale en temps réel pour superposer l'information radiométrique au contexte géographique ou comparer deux états.
+
+### 3. Comparateur Bi-Date à Curseur Vertical ($2020 \mid 2026$)
+- Un rideau vertical mobile (séparateur $2020 \mid 2026$ avec poignée $\blacktriangleleft \blacktriangleright$) permet de balayer l'écran de gauche à droite pour observer la transition temporelle directe.
+- **7 Préréglages Thématiques Intégrés** :
+  1. 🏙️ **Urbanisation & Artificialisation** : Expansion des couronnes métropolitaines, plateformes logistiques et zones pavillonnaires sur terres agricoles (révélé par le SWIR et le recul du NDVI).
+  2. 🌾 **Agriculture & Assolement** : Dynamique des rotations culturales, parcelles sous pivot d'irrigation estivale vs parcelles récoltées en stress hydrique.
+  3. 🔥 **Incendies & Cicatrices de Feux** : Forêt dense intacte en 2020 vs vastes brûlis et sols calcinés en 2026 (contraste thermique et minéral en SWIR / NBR).
+  4. 🌲 **Déforestation & Coupes Rases** : Recul des massifs forestiers continus, fragmentation de la canopée et clairières d'exploitation forestière (False Color NIR).
+  5. 💧 **Évolution des Plans d'Eau & Sécheresse** : Rétraction de la ligne d'eau de réservoirs et barrages sous épisodes caniculaires avec berges vaseuses asséchées (NDWI).
+  6. 🏖️ **Dynamique Littorale & Érosion** : Recul du trait de côte dunaire, déplacement des passes et bancs de sable côtiers (Bassin d'Arcachon, Camargue).
+  7. ❄️ **Neige, Névés & Glaciers** : Retrait des langues glaciaires alpines et dénudation des moraines rocheuses d'altitude.
+
+---
+
+## 📈 Moteur Temporel Statistique & Climatologie (2018–2026)
+
+Le moteur temporel dépasse la simple visualisation de points chronologiques pour offrir une **suite statistique analytique avancée** :
+
+```
+NDVI
+2018 ───────────────────────────────────────────────────────────── 2026
+
+     ╭──╮
+ ───╯  ╰──╮              ╭─────────────────────
+           ╰─────────────╯  (Anomalie détectée : -18 %)
+```
+
+### 1. Métriques Statistiques Calculées
+- **Moyenne Arithmétique ($\mu$)** : Niveau moyen du cycle végétatif et météo.
+- **Médiane ($P_{50}$)** : Valeur centrale robuste éliminant les perturbations nuageuses et artefacts radiométriques.
+- **Minimum & Maximum** : Amplitude absolue observée sur l'ensemble de la chronique.
+- **Percentiles ($P_{10}$, $P_{25}$, $P_{75}$, $P_{90}$)** :
+  - Enveloppe interpercentile $P_{10} - P_{90}$ représentant $80\%$ de la distribution normale.
+  - Intervalle interquartile $P_{25} - P_{75}$.
+- **Tendance Linéaire ($\beta$, $R^2$)** : Régression Theil-Sen quantifiant la vitesse d'évolution séculaire ($\Delta \% / \text{an}$).
+- **Moyenne Mobile (Rolling Average 30 jours)** : Lissage du signal pour isoler les trajectoires phénologiques réelles.
+
+### 2. Comparaison avec la Climatologie Pluriannuelle (2018–2025)
+$$\Delta\% = \frac{\text{NDVI}_{\text{actuel}} - \mu_{\text{clim (2018-2025)}}}{\mu_{\text{clim (2018-2025)}}} \times 100\%$$
+
+- **Détection Automatique d'Anomalies** :
+  - 🚨 **Anomalie Négative Sévère** ($\le -15\%$, ex: **$-18\%$**) : Déclenchement automatique d'une alerte de stress hydrique aigu, sécheresse ou déficit critique de canopée.
+  - ⚠️ **Déficit Modéré** ($-5\%$ à $-15\%$).
+  - ✅ **Conforme aux normales** ($\pm 5\%$).
+  - 🌿 **Excédent de Vigueur** ($> +15\%$).
+- **Grille Décadaire/Mensuelle Synchronisée** : Tableau exhaustif mois par mois confrontant la référence 2018–2025 à la dynamique 2026.
+- **Export CSV Universel** : Téléchargement complet des chroniques avec horodatages, valeurs brutes, moyennes mobiles, baselines climatologiques et pourcentages d'anomalies.
 
 ---
 

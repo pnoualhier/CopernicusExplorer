@@ -11,6 +11,7 @@ import { DemoProvider } from '../services/copernicus/demoProvider';
 import { GeminiAnalyst } from '../services/ai/geminiAnalyst';
 import { globalCache } from '../cache/lruCache';
 import { Logger } from '../utils/logger';
+import { TemporalAnalyticsEngine } from '../../src/utils/temporalAnalyticsEngine';
 
 export const copernicusRouter = Router();
 
@@ -155,6 +156,30 @@ copernicusRouter.post('/timeseries', async (req: Request, res: Response) => {
   } catch (err) {
     Logger.error('Timeseries endpoint failed', err, { correlationId });
     return res.status(500).json({ error: 'Erreur extraction série temporelle.' });
+  }
+});
+
+/**
+ * GET /api/copernicus/timeseries/multiyear
+ * Returns 2018–2026 multi-year statistical series, moving average, climatological baseline & anomalies
+ */
+copernicusRouter.get('/timeseries/multiyear', async (req: Request, res: Response) => {
+  try {
+    const lat = parseFloat(req.query.lat as string) || 43.604;
+    const lng = parseFloat(req.query.lng as string) || 1.444;
+    const startYear = parseInt(req.query.startYear as string) || 2018;
+    const endYear = parseInt(req.query.endYear as string) || 2026;
+
+    const cacheKey = `multiyear:${lat.toFixed(2)}:${lng.toFixed(2)}:${startYear}:${endYear}`;
+    const cached = globalCache.get(cacheKey);
+    if (cached) return res.json({ data: cached, cached: true });
+
+    const multiyearData = TemporalAnalyticsEngine.generateMultiYearSeries(lat, lng, startYear, endYear);
+    globalCache.set(cacheKey, multiyearData, 30 * 60 * 1000);
+
+    return res.json({ data: multiyearData, cached: false });
+  } catch (err) {
+    return res.status(500).json({ error: 'Erreur extraction série pluri-annuelle.' });
   }
 });
 

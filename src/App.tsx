@@ -36,6 +36,8 @@ import { useTheme } from './context/ThemeContext';
 import { ProjectWorkspace } from './components/project/ProjectWorkspace';
 import { NewProjectModal } from './components/project/NewProjectModal';
 import { InteractiveMapStudio } from './components/map/InteractiveMapStudio';
+import { SatelliteVignetteStudio } from './components/vignettes/SatelliteVignetteStudio';
+import { TemporalEngineStudio } from './components/temporal/TemporalEngineStudio';
 import { ProjectService } from './services/projectService';
 import { AnalysisProject } from './types/project';
 import {
@@ -46,6 +48,9 @@ import {
   Search,
   Sparkles,
   Download,
+  Eye,
+  Sliders,
+  TrendingUp,
   Thermometer,
   Wind,
   Droplet,
@@ -90,7 +95,7 @@ export default function App() {
 
   // Navigation
   const [activeTab, setActiveTab] = useState<
-    'map' | 'project' | 'dashboard' | 'observations' | 'climate' | 'atmosphere' | 'marine' | 'sources'
+    'map' | 'vignettes' | 'temporal' | 'project' | 'dashboard' | 'observations' | 'climate' | 'atmosphere' | 'marine' | 'sources'
   >('map');
 
   // Modals & Drawers
@@ -409,6 +414,40 @@ export default function App() {
             </button>
           </Tooltip>
 
+          <Tooltip content="Vignettes satellites multispectrales (RGB, False Color, NDVI, SWIR, NDWI), curseur d'opacité et comparateur vertical de dates (2020 | 2026)">
+            <button
+              onClick={() => setActiveTab('vignettes')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition ${
+                activeTab === 'vignettes'
+                  ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-md ring-1 ring-cyan-400'
+                  : 'text-cyan-700 dark:text-cyan-400 hover:text-cyan-900 dark:hover:text-cyan-200 hover:bg-cyan-50 dark:hover:bg-cyan-950/40'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>Vignettes & Bi-Date</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-800 hidden sm:inline">
+                2020 | 2026
+              </span>
+            </button>
+          </Tooltip>
+
+          <Tooltip content="Moteur temporel statistique pluri-annuel (2018–2026) : NDVI, moyenne, médiane, percentiles, tendance, moyennes mobiles, climatologie 2018–2025 et détection d'anomalies (-18%)">
+            <button
+              onClick={() => setActiveTab('temporal')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg font-bold whitespace-nowrap transition ${
+                activeTab === 'temporal'
+                  ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white shadow-md ring-1 ring-emerald-400'
+                  : 'text-emerald-700 dark:text-emerald-400 hover:text-emerald-900 dark:hover:text-emerald-200 hover:bg-emerald-50 dark:hover:bg-emerald-950/40'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span>Moteur Temporel</span>
+              <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-950 text-emerald-300 border border-emerald-800 hidden sm:inline">
+                2018 ── 2026
+              </span>
+            </button>
+          </Tooltip>
+
           <Tooltip content="Workflow central d'étude : Projet → Zone d'étude → Données → Analyses → Résultats → Rapport">
             <button
               onClick={() => setActiveTab('project')}
@@ -544,6 +583,27 @@ export default function App() {
               setLocationName(name);
             }}
             onOpenAI={() => setIsAiModalOpen(true)}
+            onOpenBiDateComparison={() => setActiveTab('vignettes')}
+            onOpenTemporalStudio={() => setActiveTab('temporal')}
+          />
+        )}
+
+        {activeTab === 'vignettes' && (
+          <SatelliteVignetteStudio
+            onOpenAI={(prompt) => {
+              setIsAiModalOpen(true);
+            }}
+          />
+        )}
+
+        {activeTab === 'temporal' && (
+          <TemporalEngineStudio
+            initialLat={point.lat}
+            initialLng={point.lng}
+            locationName={locationName}
+            onOpenAI={(prompt) => {
+              setIsAiModalOpen(true);
+            }}
           />
         )}
 
@@ -576,6 +636,8 @@ export default function App() {
             onSelectObservation={setSelectedObservation}
             onOpenProvenance={setProvenanceObs}
             onOpenAI={() => setIsAiModalOpen(true)}
+            onOpenBiDateComparison={() => setActiveTab('vignettes')}
+            onOpenTemporalStudio={() => setActiveTab('temporal')}
           />
         )}
 
@@ -592,6 +654,7 @@ export default function App() {
                 onMissionChange={setSelectedMission}
                 cloudCoverMax={cloudCoverMax}
                 onCloudCoverChange={setCloudCoverMax}
+                onOpenBiDateComparison={() => setActiveTab('vignettes')}
                 isLoading={isLoadingObs}
               />
             </div>
@@ -609,6 +672,8 @@ export default function App() {
                   onSelectObservation={setSelectedObservation}
                   onOpenProvenance={setProvenanceObs}
                   onOpenAI={() => setIsAiModalOpen(true)}
+                  onOpenBiDateComparison={() => setActiveTab('vignettes')}
+                  onOpenTemporalStudio={() => setActiveTab('temporal')}
                 />
               ) : (
                 <div className="h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl flex items-center justify-center text-slate-400 text-xs">

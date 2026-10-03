@@ -1,17 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { SpectralIndex, GeoObservation } from '../../types/copernicus';
-import { Layers, HelpCircle, Download } from 'lucide-react';
+import { Layers, HelpCircle, Download, Sliders, Maximize2 } from 'lucide-react';
 
 interface SpectralVisualizerProps {
   observation: GeoObservation;
   onOpenProvenance: () => void;
+  onOpenBiDateComparison?: () => void;
 }
 
 export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
   observation,
   onOpenProvenance,
+  onOpenBiDateComparison,
 }) => {
   const [indexMode, setIndexMode] = useState<SpectralIndex>('NDVI');
+  const [opacity, setOpacity] = useState<number>(100);
   const [customFormula, setCustomFormula] = useState('(B08 - B04) / (B08 + B04)');
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -33,6 +36,7 @@ export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
 
     // Seed generation with observation acquisition timestamp
     const seed = observation.id.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+    const opacityFactor = opacity / 100;
 
     for (let y = 0; y < height; y++) {
       for (let x = 0; x < width; x++) {
@@ -56,6 +60,12 @@ export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
           data[idx] = Math.floor(val * 220 + 25);     // NIR -> Red channel
           data[idx + 1] = Math.floor(val * 50 + 20);  // Red -> Green channel
           data[idx + 2] = Math.floor(val * 90 + 30);  // Green -> Blue channel
+        } else if (indexMode === 'SWIR') {
+          // SWIR composite (B12, B8A, B04)
+          // Healthy vegetation green, bare soil/minerals orange/brown, water black
+          data[idx] = Math.floor(val * 210 + 20);     // SWIR -> Red
+          data[idx + 1] = Math.floor(val * 170 + 40); // NIR -> Green
+          data[idx + 2] = Math.floor(val * 40 + 15);  // Red -> Blue
         } else if (indexMode === 'NDVI') {
           // NDVI ramp: Brown (-0.2) -> Yellow (0.2) -> Bright Green (0.8+)
           const ndviPix = (val - 0.5) * 0.8 + ndviMean;
@@ -97,12 +107,12 @@ export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
           data[idx + 2] = Math.floor(220 - val * 100);
         }
 
-        data[idx + 3] = 255;
+        data[idx + 3] = Math.floor(255 * opacityFactor);
       }
     }
 
     ctx.putImageData(imgData, 0, 0);
-  }, [indexMode, observation, ndviMean, ndwiMean, ndbiMean]);
+  }, [indexMode, opacity, observation, ndviMean, ndwiMean, ndbiMean]);
 
   const downloadCanvasImage = () => {
     const canvas = canvasRef.current;
@@ -125,6 +135,16 @@ export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
           </h3>
         </div>
         <div className="flex items-center gap-2">
+          {onOpenBiDateComparison && (
+            <button
+              onClick={onOpenBiDateComparison}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm transition active:scale-95"
+              title="Comparer deux dates avec curseur vertical (2020 | 2026)"
+            >
+              <Maximize2 className="w-3.5 h-3.5" />
+              <span>Comparer Bi-Date (2020 | 2026)</span>
+            </button>
+          )}
           <button
             onClick={onOpenProvenance}
             className="flex items-center gap-1 text-xs text-slate-400 hover:text-cyan-300 transition"
@@ -143,56 +163,83 @@ export const SpectralVisualizer: React.FC<SpectralVisualizerProps> = ({
         </div>
       </div>
 
-      {/* Index Selector Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 p-2 bg-slate-950/40 border-b border-slate-800 text-xs">
-        <button
-          onClick={() => setIndexMode('TRUE_COLOR')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'TRUE_COLOR' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          Couleur Vraie (RGB)
-        </button>
-        <button
-          onClick={() => setIndexMode('FALSE_COLOR')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'FALSE_COLOR' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          Fausse Couleur (NIR)
-        </button>
-        <button
-          onClick={() => setIndexMode('NDVI')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'NDVI' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          NDVI (Végétation)
-        </button>
-        <button
-          onClick={() => setIndexMode('NDWI')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'NDWI' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          NDWI (Humidité/Eau)
-        </button>
-        <button
-          onClick={() => setIndexMode('NDBI')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'NDBI' ? 'bg-amber-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          NDBI (Bâti)
-        </button>
-        <button
-          onClick={() => setIndexMode('CUSTOM')}
-          className={`px-2.5 py-1 rounded-md font-medium transition ${
-            indexMode === 'CUSTOM' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
-          }`}
-        >
-          Formule personnalisée
-        </button>
+      {/* Index Selector Tabs & Opacity Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-2 p-2 bg-slate-950/50 border-b border-slate-800 text-xs">
+        <div className="flex flex-wrap items-center gap-1">
+          <button
+            onClick={() => setIndexMode('TRUE_COLOR')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'TRUE_COLOR' ? 'bg-cyan-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            RGB (Vraie Couleur)
+          </button>
+          <button
+            onClick={() => setIndexMode('FALSE_COLOR')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'FALSE_COLOR' ? 'bg-rose-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            False Color (NIR)
+          </button>
+          <button
+            onClick={() => setIndexMode('NDVI')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'NDVI' ? 'bg-emerald-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            NDVI (Végétation)
+          </button>
+          <button
+            onClick={() => setIndexMode('SWIR')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'SWIR' ? 'bg-amber-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            SWIR (Infrarouge Court)
+          </button>
+          <button
+            onClick={() => setIndexMode('NDWI')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'NDWI' ? 'bg-blue-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            NDWI (Eau / Humidité)
+          </button>
+          <button
+            onClick={() => setIndexMode('NDBI')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'NDBI' ? 'bg-amber-700 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            NDBI (Bâti)
+          </button>
+          <button
+            onClick={() => setIndexMode('CUSTOM')}
+            className={`px-2.5 py-1 rounded-md font-medium transition ${
+              indexMode === 'CUSTOM' ? 'bg-purple-600 text-white shadow' : 'text-slate-400 hover:bg-slate-800'
+            }`}
+          >
+            Formule
+          </button>
+        </div>
+
+        {/* Opacity Slider */}
+        <div className="flex items-center gap-2 bg-slate-900/80 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] font-mono">
+          <span className="text-slate-400 flex items-center gap-1">
+            <Sliders className="w-3 h-3 text-cyan-400" />
+            <span>Opacité :</span>
+          </span>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value={opacity}
+            onChange={(e) => setOpacity(Number(e.target.value))}
+            className="w-20 sm:w-28 h-1.5 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-cyan-400"
+          />
+          <span className="text-cyan-300 font-bold w-8 text-right">{opacity}%</span>
+        </div>
       </div>
 
       {/* Custom Formula input when in custom mode */}

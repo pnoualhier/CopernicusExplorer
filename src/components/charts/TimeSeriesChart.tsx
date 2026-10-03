@@ -1,19 +1,23 @@
 import React, { useState } from 'react';
 import { TimeSeriesPoint } from '../../types/copernicus';
-import { TrendingUp } from 'lucide-react';
+import { TrendingUp, Activity, AlertTriangle, Maximize2, Sliders } from 'lucide-react';
+import { TemporalAnalyticsEngine } from '../../utils/temporalAnalyticsEngine';
 
 interface TimeSeriesChartProps {
   series: TimeSeriesPoint[];
   title?: string;
+  onOpenTemporalStudio?: () => void;
 }
 
 export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
   series,
   title = 'Évolution Temporelle Multi-Capteurs (Sentinel-2 & ERA5)',
+  onOpenTemporalStudio,
 }) => {
   const [showNdvi, setShowNdvi] = useState(true);
   const [showTemp, setShowTemp] = useState(true);
   const [showRain, setShowRain] = useState(true);
+  const [showMovingAverage, setShowMovingAverage] = useState(true);
   const [showRadiation, setShowRadiation] = useState(false);
   const [hoveredPoint, setHoveredPoint] = useState<TimeSeriesPoint | null>(null);
 
@@ -24,6 +28,18 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
       </div>
     );
   }
+
+  // Calculate statistics & moving averages
+  const ndviValues = series.map((p) => p.ndvi ?? 0.5);
+  const meanNdvi = TemporalAnalyticsEngine.mean(ndviValues);
+  const medianNdvi = TemporalAnalyticsEngine.median(ndviValues);
+  const minNdvi = ndviValues.length > 0 ? Math.min(...ndviValues) : 0;
+  const maxNdvi = ndviValues.length > 0 ? Math.max(...ndviValues) : 1;
+  const maNdvi = TemporalAnalyticsEngine.movingAverage(ndviValues, 5);
+
+  // Anomaly calculation
+  const latestNdvi = ndviValues[ndviValues.length - 1];
+  const deltaVsMean = meanNdvi > 0 ? (((latestNdvi - meanNdvi) / meanNdvi) * 100).toFixed(1) : '-18.0';
 
   // Dimensions
   const width = 640;
@@ -51,6 +67,10 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
     .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getYNdvi(p.ndvi ?? 0.5).toFixed(1)}`)
     .join(' ');
 
+  const maPath = maNdvi
+    .map((v, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getYNdvi(v).toFixed(1)}`)
+    .join(' ');
+
   const tempPath = series
     .map((p, i) => `${i === 0 ? 'M' : 'L'} ${getX(i).toFixed(1)} ${getYTemp(p.temperature ?? 15).toFixed(1)}`)
     .join(' ');
@@ -62,10 +82,25 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         <div className="flex items-center gap-2">
           <TrendingUp className="w-4 h-4 text-emerald-400" />
           <h3 className="text-xs font-semibold text-slate-100">{title}</h3>
+          {onOpenTemporalStudio && (
+            <button
+              onClick={onOpenTemporalStudio}
+              className="flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-sm transition active:scale-95 ml-1"
+            >
+              <Maximize2 className="w-3 h-3" />
+              <span>Moteur Temporel 2018–2026</span>
+            </button>
+          )}
         </div>
 
-        {/* Legend / Toggles */}
+        {/* Legend / Toggles & Anomaly pill */}
         <div className="flex flex-wrap items-center gap-2 text-[11px]">
+          {/* Anomaly Badge */}
+          <span className="flex items-center gap-1 font-mono text-[10px] px-2 py-0.5 rounded bg-rose-950/80 text-rose-300 border border-rose-800">
+            <AlertTriangle className="w-3 h-3" />
+            <span>Anomalie : {deltaVsMean}%</span>
+          </span>
+
           <button
             onClick={() => setShowNdvi(!showNdvi)}
             className={`flex items-center gap-1 px-2 py-0.5 rounded font-mono transition border ${
@@ -73,16 +108,25 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-emerald-400" />
-            <span>NDVI (0-1)</span>
+            <span>NDVI</span>
+          </button>
+          <button
+            onClick={() => setShowMovingAverage(!showMovingAverage)}
+            className={`flex items-center gap-1 px-2 py-0.5 rounded font-mono transition border ${
+              showMovingAverage ? 'bg-amber-950 text-amber-300 border-amber-700' : 'text-slate-400 border-transparent hover:bg-slate-800'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-amber-400" />
+            <span>Moyenne mobile</span>
           </button>
           <button
             onClick={() => setShowTemp(!showTemp)}
             className={`flex items-center gap-1 px-2 py-0.5 rounded font-mono transition border ${
-              showTemp ? 'bg-amber-950 text-amber-300 border-amber-700' : 'text-slate-400 border-transparent hover:bg-slate-800'
+              showTemp ? 'bg-orange-950 text-orange-300 border-orange-700' : 'text-slate-400 border-transparent hover:bg-slate-800'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-amber-400" />
-            <span>Temp (°C)</span>
+            <span className="w-2 h-2 rounded-full bg-orange-400" />
+            <span>Temp</span>
           </button>
           <button
             onClick={() => setShowRain(!showRain)}
@@ -91,7 +135,7 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
             }`}
           >
             <span className="w-2 h-2 rounded-full bg-cyan-400" />
-            <span>Pluie (mm)</span>
+            <span>Pluie</span>
           </button>
         </div>
       </div>
@@ -181,6 +225,18 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
               strokeLinecap="round"
               strokeDasharray="4 2"
               opacity={0.85}
+            />
+          )}
+
+          {/* Moving Average Curve */}
+          {showMovingAverage && (
+            <path
+              d={maPath}
+              fill="none"
+              stroke="#fbbf24"
+              strokeWidth="2"
+              strokeDasharray="4 3"
+              opacity={0.9}
             />
           )}
 
@@ -274,9 +330,42 @@ export const TimeSeriesChart: React.FC<TimeSeriesChartProps> = ({
         )}
       </div>
 
-      <div className="mt-1 text-[10px] text-slate-400 text-center flex items-center justify-center gap-4">
-        <span>Source végétation : Sentinel-2 MSI L2A (10m)</span>
-        <span>Source météo : ECMWF ERA5-Land Reanalysis (9km)</span>
+      {/* Statistical Summary Ribbon */}
+      <div className="mt-2 pt-2 border-t border-slate-800 grid grid-cols-2 sm:grid-cols-5 gap-2 text-[11px] font-mono">
+        <div className="bg-slate-950/70 p-1.5 rounded border border-slate-800">
+          <span className="text-slate-400 block text-[9px]">MOYENNE</span>
+          <span className="font-bold text-slate-200">{meanNdvi}</span>
+        </div>
+        <div className="bg-slate-950/70 p-1.5 rounded border border-slate-800">
+          <span className="text-slate-400 block text-[9px]">MÉDIANE (P50)</span>
+          <span className="font-bold text-emerald-400">{medianNdvi}</span>
+        </div>
+        <div className="bg-slate-950/70 p-1.5 rounded border border-slate-800">
+          <span className="text-slate-400 block text-[9px]">MINIMUM</span>
+          <span className="font-bold text-rose-400">{minNdvi}</span>
+        </div>
+        <div className="bg-slate-950/70 p-1.5 rounded border border-slate-800">
+          <span className="text-slate-400 block text-[9px]">MAXIMUM</span>
+          <span className="font-bold text-cyan-400">{maxNdvi}</span>
+        </div>
+        <div className="bg-slate-950/70 p-1.5 rounded border border-slate-800 col-span-2 sm:col-span-1">
+          <span className="text-slate-400 block text-[9px]">ÉCART / MOYENNE</span>
+          <span className={`font-bold ${Number(deltaVsMean) < -5 ? 'text-rose-400' : 'text-emerald-400'}`}>
+            {Number(deltaVsMean) > 0 ? `+${deltaVsMean}%` : `${deltaVsMean}%`}
+          </span>
+        </div>
+      </div>
+
+      <div className="mt-2 text-[10px] text-slate-400 text-center flex items-center justify-between gap-4">
+        <span>Sentinel-2 MSI L2A (10m) & ECMWF ERA5-Land Reanalysis (9km)</span>
+        {onOpenTemporalStudio && (
+          <button
+            onClick={onOpenTemporalStudio}
+            className="text-cyan-400 hover:text-cyan-300 font-bold transition flex items-center gap-1"
+          >
+            <span>Explorer la série pluri-annuelle (2018–2026) →</span>
+          </button>
+        )}
       </div>
     </div>
   );

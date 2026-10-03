@@ -2,6 +2,8 @@ import React from 'react';
 import {
   X,
   Globe2,
+  Sliders,
+  TrendingUp,
   FolderKanban,
   LayoutDashboard,
   Satellite,
@@ -116,6 +118,52 @@ export const HamburgerMenu: React.FC<HamburgerMenuProps> = ({
                       </span>
                     </div>
                     <div className="text-[10px] text-slate-400">Dessin → Données → Analyse Immédiate</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate(() => onSelectTab('vignettes'))}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  activeTab === 'vignettes'
+                    ? 'bg-gradient-to-r from-cyan-600 to-blue-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <Sliders className="w-4 h-4 text-cyan-400" />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <span>Vignettes & Bi-Date</span>
+                      <span className="text-[9px] font-mono bg-cyan-950 text-cyan-300 px-1 rounded border border-cyan-800">
+                        2020 | 2026
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">RGB, False Color, NDVI, SWIR, NDWI, Curseur vertical</div>
+                  </div>
+                </div>
+                <ChevronRight className="w-4 h-4 opacity-50" />
+              </button>
+
+              <button
+                onClick={() => handleNavigate(() => onSelectTab('temporal'))}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-medium transition ${
+                  activeTab === 'temporal'
+                    ? 'bg-gradient-to-r from-emerald-600 to-cyan-600 text-white shadow-sm'
+                    : 'text-slate-300 hover:bg-slate-800/80 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-2.5">
+                  <TrendingUp className="w-4 h-4 text-emerald-400" />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5 font-bold">
+                      <span>Moteur Temporel</span>
+                      <span className="text-[9px] font-mono bg-emerald-950 text-emerald-300 px-1 rounded border border-emerald-800">
+                        2018 ── 2026
+                      </span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">Moyenne, médiane, percentiles, climatologie, anomalies (-18%)</div>
                   </div>
                 </div>
                 <ChevronRight className="w-4 h-4 opacity-50" />

@@ -13,7 +13,7 @@ export type MissionType =
   | 'CAMS-ATMOSPHERE'
   | 'COPERNICUS-MARINE';
 
-export type SpectralIndex = 'TRUE_COLOR' | 'FALSE_COLOR' | 'NDVI' | 'NDWI' | 'NDBI' | 'CUSTOM';
+export type SpectralIndex = 'TRUE_COLOR' | 'FALSE_COLOR' | 'NDVI' | 'SWIR' | 'NDWI' | 'NDBI' | 'CUSTOM';
 
 export interface BoundingBox {
   west: number;

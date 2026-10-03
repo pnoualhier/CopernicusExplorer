@@ -123,6 +123,8 @@ interface InteractiveMapStudioProps {
   initialPoint?: GeoPoint;
   onSelectZone?: (bbox: BoundingBox, point: GeoPoint, name: string) => void;
   onOpenAI?: () => void;
+  onOpenBiDateComparison?: () => void;
+  onOpenTemporalStudio?: () => void;
 }
 
 export const InteractiveMapStudio: React.FC<InteractiveMapStudioProps> = ({
@@ -130,6 +132,8 @@ export const InteractiveMapStudio: React.FC<InteractiveMapStudioProps> = ({
   initialPoint = { lat: 43.604, lng: 1.444 },
   onSelectZone,
   onOpenAI,
+  onOpenBiDateComparison,
+  onOpenTemporalStudio,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<L.Map | null>(null);
@@ -1131,6 +1135,28 @@ export const InteractiveMapStudio: React.FC<InteractiveMapStudioProps> = ({
 
           {/* Quick Actions in Panel */}
           <div className="flex items-center gap-2 pt-1 border-t border-slate-800">
+            {onOpenTemporalStudio && (
+              <button
+                onClick={onOpenTemporalStudio}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white shadow-md shadow-emerald-600/20 transition active:scale-95"
+                title="Analyser l'évolution temporelle statistique (2018–2026)"
+              >
+                <TrendingUp className="w-3.5 h-3.5" />
+                <span>2018 ── 2026</span>
+              </button>
+            )}
+
+            {onOpenBiDateComparison && (
+              <button
+                onClick={onOpenBiDateComparison}
+                className="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold bg-cyan-600 hover:bg-cyan-500 text-white shadow-md shadow-cyan-600/20 transition active:scale-95"
+                title="Comparer cette zone entre 2020 et 2026 avec curseur vertical"
+              >
+                <Maximize2 className="w-3.5 h-3.5" />
+                <span>2020 | 2026</span>
+              </button>
+            )}
+
             {onOpenAI && (
               <button
                 onClick={onOpenAI}

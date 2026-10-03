@@ -23,6 +23,8 @@ interface UnifiedDashboardProps {
   onSelectObservation: (obs: GeoObservation) => void;
   onOpenProvenance: (obs: GeoObservation) => void;
   onOpenAI: () => void;
+  onOpenBiDateComparison?: () => void;
+  onOpenTemporalStudio?: () => void;
 }
 
 export const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
@@ -35,6 +37,8 @@ export const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
   onPointChange,
   onOpenProvenance,
   onOpenAI,
+  onOpenBiDateComparison,
+  onOpenTemporalStudio,
 }) => {
   // Current real-time indicators
   const latestTs = timeSeries[timeSeries.length - 1] || {
@@ -159,6 +163,7 @@ export const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
             <SpectralVisualizer
               observation={selectedObservation}
               onOpenProvenance={() => onOpenProvenance(selectedObservation)}
+              onOpenBiDateComparison={onOpenBiDateComparison}
             />
           ) : (
             <div className="h-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6 flex flex-col items-center justify-center text-center text-slate-500 dark:text-slate-400">
@@ -179,6 +184,7 @@ export const UnifiedDashboard: React.FC<UnifiedDashboardProps> = ({
         <TimeSeriesChart
           series={timeSeries}
           title={`Évolution Temporelle Multi-Capteurs : ${locationName}`}
+          onOpenTemporalStudio={onOpenTemporalStudio}
         />
       </div>
     </div>
